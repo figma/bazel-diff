@@ -88,7 +88,7 @@ class RuleHasher(
                     sourceDigests[ruleInput] = heuristicDigest
                     putDirectBytes(heuristicDigest)
                   }
-                  else ->
+                  !ruleInput.startsWith("@") ->
                       logger.w {
                         "Unable to calculate digest for input $ruleInput for rule ${rule.name}"
                       }
