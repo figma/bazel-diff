@@ -141,18 +141,17 @@ class BazelQueryService(
 
     logger.i { "Executing Query: $query" }
     logger.i { "Command: ${cmd.toTypedArray().joinToString()}" }
-    val result = runBlocking {
-      process(
-          *cmd.toTypedArray(),
-          stdout = Redirect.ToFile(outputFile),
-          workingDirectory = workingDirectory.toFile(),
-          stderr = Redirect.PRINT,
-          destroyForcibly = true,
-      )
-    }
-
-    if (result.resultCode != 0)
-        throw RuntimeException("Bazel query failed, exit code ${result.resultCode}")
+    
+    val process = ProcessBuilder(*cmd.toTypedArray())
+        .directory(workingDirectory.toFile())
+        .redirectOutput(ProcessBuilder.Redirect.to(outputFile))
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+    
+    val resultCode = process.waitFor()
+    
+    if (resultCode != 0)
+        throw RuntimeException("Bazel query failed, exit code $resultCode")
     return outputFile
   }
 
